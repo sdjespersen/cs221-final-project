@@ -1,5 +1,7 @@
 import pandas as pd
 
+SPLIT = 1251271
+
 INTERESTING_COLS = """
 fire_size
 fire_year
@@ -50,7 +52,7 @@ def normalize(df):
 
 
 def load_dataset(df_path):
-  """Returns an (X, Y) pair of DataFrames given the data location."""
+  """Returns (Xtrain, Ytrain), (Xtest, Ytest) splits for the data."""
   df = pd.read_parquet(df_path)
   df.rename(columns={s: s.lower() for s in df.columns}, inplace=True)
   df.stat_cause_code = df.stat_cause_code.astype(int)
@@ -58,10 +60,13 @@ def load_dataset(df_path):
   # Drop codes 9 and 13, corresponding to miscellaneous and unknown causes,
   # which are pretty useless.
   df = df[(df.stat_cause_code != 9) & (df.stat_cause_code != 13)]
-  label_df = pd.get_dummies(df.stat_cause_descr)
+  labels = pd.get_dummies(df.stat_cause_descr)
   df['burn_time'] = df.cont_date - df.discovery_date
   df['burn_time_notna'] = df.burn_time.notna().astype(int)
   data = df.filter(items=FEATURE_COLS)
   data = data.join(pd.get_dummies(df.state))
   data = data.rename(columns={s: s.lower() for s in data.columns})
-  return normalize(data), label_df
+  data = normalize(data)
+  Xtrain, Ytrain = data.iloc[:SPLIT], labels.iloc[:SPLIT]
+  Xtest, Ytest = data.iloc[SPLIT:], labels.iloc[SPLIT:]
+  return (Xtrain, Ytrain), (Xtest, Ytest)
