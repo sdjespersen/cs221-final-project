@@ -13,3 +13,5 @@ Each feature is subsequently normalized: `fire_size`, `fire_year`, and `burn_tim
 `mlp-with-states-2x256.h5` is a 2x256 model trained on the above features PLUS `state` (one-hot encoded using `pd.get_dummies`).
 
 `mlp-4x256.h5` is a 4x256 model identical to the `2x256` one, except with 2 extra hidden layers.
+
+`mlp-4x512-with-bnorm.h5` is a 4x512 model with a `BatchNormalization` layer in between layers 2 and 3.
